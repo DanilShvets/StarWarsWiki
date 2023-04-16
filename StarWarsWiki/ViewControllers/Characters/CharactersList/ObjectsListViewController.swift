@@ -29,11 +29,19 @@ final class ObjectsListViewController: UIViewController {
         return tableView
     }()
     
+    private lazy var refreshButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.addTarget(self, action: #selector(refreshButtonPressed), for: .touchUpInside)
+        button.titleLabel?.textColor = UIColor.AppColors.signUpColor
+        return button
+    }()
+    
     private let categories = (CharactersResponse.self, PlanetsResponse.self, ShipsResponse.self, VehiclesResponse.self, FilmsResponse.self)
     private var objectsFromResponse = Dictionary<String, [String]>()
     private var sortedArray = [String]()
     private let urlCategories = ["people", "planets", "starships", "vehicles", "films"]
     private let labelTexts = ["CHARACTERS", "PLANETS", "SHIPS", "VEHICLES", "FILMS"]
+    private let activityIndicator = UIActivityIndicatorView()
     
     var chosenCategory = 0
     
@@ -47,28 +55,13 @@ final class ObjectsListViewController: UIViewController {
         
         self.title = labelTexts[chosenCategory]
         
-        if chosenCategory != 4 {
-            for page in 1...3 {
-                parseCharacter(page, urlCategories[chosenCategory])
+        configureTableView()
+        parseDataForChosenCategory()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            if self.sortedArray.count == 0 {
+                self.configureRefreshButton()
             }
-        } else {
-            parseCharacter(1, urlCategories[chosenCategory])
-        }
-        
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            self.showActivityIndicator()
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + UIConstants.delayArraySort) {
-            self.sortedArray = self.objectsFromResponse.map({ $0.key }).sorted(by: <)
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + UIConstants.delayTableViewConfigure) {
-            self.configureTableView()
-            self.tableView.reloadData()
-            print(self.sortedArray)
-            print(self.sortedArray.count)
         }
     }
     
@@ -101,31 +94,37 @@ final class ObjectsListViewController: UIViewController {
                     charactersResponse.results.forEach { item in
                         self.objectsFromResponse.updateValue([item.gender, item.birth_year], forKey: item.name)
                     }
+                    self.reloadTableView()
                 case 1:
                     let charactersResponse = try JSONDecoder().decode(self.categories.1, from: data)
                     charactersResponse.results.forEach { item in
                         self.objectsFromResponse.updateValue([item.terrain, item.population], forKey: item.name)
                     }
+                    self.reloadTableView()
                 case 2:
                     let charactersResponse = try JSONDecoder().decode(self.categories.2, from: data)
                     charactersResponse.results.forEach { item in
                         self.objectsFromResponse.updateValue([item.model, item.crew], forKey: item.name)
                     }
+                    self.reloadTableView()
                 case 3:
                     let charactersResponse = try JSONDecoder().decode(self.categories.3, from: data)
                     charactersResponse.results.forEach { item in
                         self.objectsFromResponse.updateValue([item.model, item.crew], forKey: item.name)
                     }
+                    self.reloadTableView()
                 case 4:
                     let charactersResponse = try JSONDecoder().decode(self.categories.4, from: data)
                     charactersResponse.results.forEach { item in
                         self.objectsFromResponse.updateValue([item.director, item.release_date], forKey: item.title)
                     }
+                    self.reloadTableView()
                 default:
                     let charactersResponse = try JSONDecoder().decode(self.categories.0, from: data)
                     charactersResponse.results.forEach { item in
                         self.objectsFromResponse.updateValue([item.homeworld, item.birth_year], forKey: item.name)
                     }
+                    self.reloadTableView()
                 }
             } catch  {
                 print(error)
@@ -154,20 +153,35 @@ final class ObjectsListViewController: UIViewController {
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
-    private func showActivityIndicator() {
-        let activityIndicator = UIActivityIndicatorView()
-        activityIndicator.frame = CGRect(x: 0, y: 0, width: 0, height: 0)
-        activityIndicator.color = .gray
-        activityIndicator.hidesWhenStopped = true
-        activityIndicator.style = .large
-        
-        view.addSubview(activityIndicator)
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        activityIndicator.startAnimating()
-        DispatchQueue.main.asyncAfter(deadline: .now() + UIConstants.delayTableViewConfigure) {
-            activityIndicator.stopAnimating()
+    private func reloadTableView() {
+        self.sortedArray = self.objectsFromResponse.map({ $0.key }).sorted(by: <)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.tableView.reloadData()
+        }
+    }
+    
+    private func parseDataForChosenCategory() {
+        if chosenCategory != 4 {
+            for page in 1...3 {
+                parseCharacter(page, urlCategories[chosenCategory])
+            }
+        } else {
+            parseCharacter(1, urlCategories[chosenCategory])
+        }
+        reloadTableView()
+    }
+    
+    private func configureRefreshButton() {
+        let refreshBarButtonItem = UIBarButtonItem(title: "Refresh", style: .done, target: self, action: #selector(refreshButtonPressed))
+        self.navigationItem.rightBarButtonItem  = refreshBarButtonItem
+    }
+    
+    @objc private func refreshButtonPressed() {
+        parseDataForChosenCategory()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            if self.sortedArray.count != 0 {
+                self.navigationItem.rightBarButtonItem = nil
+            }
         }
     }
     
