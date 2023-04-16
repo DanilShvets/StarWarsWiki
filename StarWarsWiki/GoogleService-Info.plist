@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>288065565259-154pmpq4gsc4lkbd345n9o6a10o4tlf0.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.288065565259-154pmpq4gsc4lkbd345n9o6a10o4tlf0</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBcB9ALQzuwGDtxTzm8Nk08LL-fLbaqepM</string>
+	<key>GCM_SENDER_ID</key>
+	<string>288065565259</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.danilshvets.StarWarsWiki</string>
+	<key>PROJECT_ID</key>
+	<string>usersdatabaseforapp</string>
+	<key>STORAGE_BUCKET</key>
+	<string>usersdatabaseforapp.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:288065565259:ios:97275524b474a35c2213ce</string>
+</dict>
+</plist>
