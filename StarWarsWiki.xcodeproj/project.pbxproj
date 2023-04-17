@@ -147,9 +147,9 @@
 			children = (
 				E058CDAD29EA771B000499FD /* Launch */,
 				E03E277029E087D7002F299A /* LogIn */,
-				E0E2A46E29E839DF00341CE9 /* SighUp */,
+				E0E2A46E29E839DF00341CE9 /* SignUp */,
 				E03E277F29E096DA002F299A /* Categories */,
-				E058FBA329E2989E00BF957F /* Characters */,
+				E058FBA329E2989E00BF957F /* ObjectsScreens */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -197,30 +197,30 @@
 			path = Launch;
 			sourceTree = "<group>";
 		};
-		E058FBA329E2989E00BF957F /* Characters */ = {
+		E058FBA329E2989E00BF957F /* ObjectsScreens */ = {
 			isa = PBXGroup;
 			children = (
-				E058FBA629E2AAE900BF957F /* CharactersList */,
-				E058FBA729E2AAFB00BF957F /* CharacterPage */,
+				E058FBA629E2AAE900BF957F /* ObjectsList */,
+				E058FBA729E2AAFB00BF957F /* ObjectPage */,
 			);
-			path = Characters;
+			path = ObjectsScreens;
 			sourceTree = "<group>";
 		};
-		E058FBA629E2AAE900BF957F /* CharactersList */ = {
+		E058FBA629E2AAE900BF957F /* ObjectsList */ = {
 			isa = PBXGroup;
 			children = (
 				E058FBA829E2AB2400BF957F /* ObjectsListViewController.swift */,
 				E0CF757329E2E2D80090F5D3 /* ObjectsListViewCell.swift */,
 			);
-			path = CharactersList;
+			path = ObjectsList;
 			sourceTree = "<group>";
 		};
-		E058FBA729E2AAFB00BF957F /* CharacterPage */ = {
+		E058FBA729E2AAFB00BF957F /* ObjectPage */ = {
 			isa = PBXGroup;
 			children = (
 				E06A9A2729E5D10E00BD4945 /* ObjectPageViewController.swift */,
 			);
-			path = CharacterPage;
+			path = ObjectPage;
 			sourceTree = "<group>";
 		};
 		E05A6DD229EB351A009B385B /* CharacterResponse */ = {
@@ -268,12 +268,12 @@
 			path = FilmResponse;
 			sourceTree = "<group>";
 		};
-		E0E2A46E29E839DF00341CE9 /* SighUp */ = {
+		E0E2A46E29E839DF00341CE9 /* SignUp */ = {
 			isa = PBXGroup;
 			children = (
 				E0E2A46F29E839FC00341CE9 /* SignUpViewController.swift */,
 			);
-			path = SighUp;
+			path = SignUp;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

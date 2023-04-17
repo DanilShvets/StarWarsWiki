@@ -72,7 +72,6 @@ final class CategoriesViewController: UIViewController {
     private func presentChosenCategoryView(_ modelIndex: Int) {
         let nextViewController = ObjectsListViewController()
         nextViewController.chosenCategory = modelIndex
-        print(modelIndex)
         navigationController?.navigationItem.hidesBackButton = false
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
