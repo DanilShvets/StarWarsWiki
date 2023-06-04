@@ -21,7 +21,7 @@ final class CategoriesViewController: UIViewController {
         let sizeCell = CGSize(width: collection.bounds.width - UIConstants.cellPadding, height: UIConstants.cellHieght)
         layout.itemSize = sizeCell
         layout.scrollDirection = .vertical
-        layout.minimumLineSpacing = 5
+        layout.minimumLineSpacing = 20
         collection.delegate = self
         collection.dataSource = self
         collection.indicatorStyle = .black
@@ -110,10 +110,17 @@ extension CategoriesViewController: UICollectionViewDataSource, UICollectionView
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let cell = collectionView.cellForItem(at: indexPath)
+        UIView.animate(withDuration: 0.1) {
+            cell?.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            cell?.alpha = 0.8
+        }
+        
+        UIView.animate(withDuration: 0.1, delay: 0.5) {
+            cell?.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+            cell?.alpha = 1.0
+        }
+        
         presentChosenCategoryView(indexPath.row)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 20
     }
 }

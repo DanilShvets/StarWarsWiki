@@ -100,9 +100,9 @@ final class ObjectPageViewController: UIViewController {
         configureImageView()
         configureImage(objectName, chosenCategory)
         configureNameLabel()
+        configureHeadersLabel()
         configureForDarthVader()
         configureForAnakin()
-        configureHeadersLabel()
         
         if chosenCategory == 4 {
             secondText.text = convertDateFormatter(date: secondText.text ?? "")
@@ -127,8 +127,8 @@ final class ObjectPageViewController: UIViewController {
         name.translatesAutoresizingMaskIntoConstraints = false
         name.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         name.topAnchor.constraint(equalTo: image.bottomAnchor, constant: UIConstants.padding).isActive = true
-        name.widthAnchor.constraint(equalToConstant: view.bounds.width - 2 * UIConstants.padding).isActive = true
-        name.heightAnchor.constraint(equalToConstant: UIConstants.labelHeight).isActive = true
+        name.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 10.0).isActive = true
+        name.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -10.0).isActive = true
         name.text = objectName
     }
     
@@ -137,8 +137,8 @@ final class ObjectPageViewController: UIViewController {
             view.addSubview(object)
             object.translatesAutoresizingMaskIntoConstraints = false
             object.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-            object.widthAnchor.constraint(equalToConstant: view.bounds.width - 2 * UIConstants.padding).isActive = true
-            object.heightAnchor.constraint(equalToConstant: UIConstants.headersLabelHeight).isActive = true
+            object.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 10.0).isActive = true
+            object.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -10.0).isActive = true
             object.text = headers[chosenCategory][object.tag]
         }
         
@@ -146,12 +146,12 @@ final class ObjectPageViewController: UIViewController {
             view.addSubview(object)
             object.translatesAutoresizingMaskIntoConstraints = false
             object.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-            object.widthAnchor.constraint(equalToConstant: view.bounds.width - 2 * UIConstants.padding).isActive = true
-            object.heightAnchor.constraint(equalToConstant: UIConstants.textLabelHeight).isActive = true
+            object.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 10.0).isActive = true
+            object.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -10.0).isActive = true
             object.text = objectData[object.tag]
         }
         
-        firstHeader.topAnchor.constraint(equalTo: name.bottomAnchor, constant: UIConstants.padding).isActive = true
+        firstHeader.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 2 * UIConstants.padding).isActive = true
         firstText.topAnchor.constraint(equalTo: firstHeader.bottomAnchor, constant: UIConstants.padding).isActive = true
         secondHeader.topAnchor.constraint(equalTo: firstText.bottomAnchor, constant: 2 * UIConstants.padding).isActive = true
         secondText.topAnchor.constraint(equalTo: secondHeader.bottomAnchor, constant: UIConstants.padding).isActive = true
@@ -182,7 +182,7 @@ final class ObjectPageViewController: UIViewController {
         dateFormatter.dateFormat = "dd.MM.yyy"
         dateFormatter.timeZone = NSTimeZone(name: "UTC") as TimeZone?
         
-        let timeStamp = dateFormatter.string(from: date!)
+        let timeStamp = dateFormatter.string(from: date ?? Date())
 
         return timeStamp
     }

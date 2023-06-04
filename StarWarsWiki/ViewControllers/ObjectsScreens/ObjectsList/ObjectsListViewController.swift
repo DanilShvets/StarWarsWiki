@@ -14,8 +14,6 @@ final class ObjectsListViewController: UIViewController {
         static let tableCellHeight: CGFloat = 65
         static let cornerRadius: CGFloat = 10
         static let activityIndicatorSize: CGFloat = 80
-        static let delayTableViewConfigure: CGFloat = 8
-        static let delayArraySort: CGFloat = 7
     }
     
     private lazy var tableView: UITableView = {
@@ -36,12 +34,12 @@ final class ObjectsListViewController: UIViewController {
         return button
     }()
     
-    private let categories = (CharactersResponse.self, PlanetsResponse.self, ShipsResponse.self, VehiclesResponse.self, FilmsResponse.self)
     private var objectsFromResponse = Dictionary<String, [String]>()
     private var sortedArray = [String]()
     private let urlCategories = ["people", "planets", "starships", "vehicles", "films"]
     private let labelTexts = ["CHARACTERS", "PLANETS", "SHIPS", "VEHICLES", "FILMS"]
     private let activityIndicator = UIActivityIndicatorView()
+    private var shouldHideActivityIndicator = false
     
     var chosenCategory = 0
     
@@ -52,84 +50,26 @@ final class ObjectsListViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = UIColor.AppColors.backgroundColor
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
-        
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         self.title = labelTexts[chosenCategory]
-        
         configureTableView()
-        parseDataForChosenCategory()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            if self.sortedArray.count == 0 {
-                self.configureRefreshButton()
-            }
-        }
+        showActivityIndicator()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
+        DispatchQueue.global().async {
+            self.parseDataForChosenCategory()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                self.reloadTableView()
+            }
+        }
         if let selectedRow = tableView.indexPathForSelectedRow {
             tableView.deselectRow(at: selectedRow, animated: true)
         }
-    }
-    
-    
-    // MARK: - Обработка запроса
-    
-    private func parseCharacter(_ pageNumber: Int, _ urlCategory: String){
-        let urlString = "https://swapi.dev/api/\(urlCategory)/?page=\(pageNumber)"
-        guard let urlRequest = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: urlRequest) { (data, response, error) in
-            if let error = error {
-                print(error)
-                return
-            }
-            
-            guard let data = data else {return}
-            
-            do {
-                switch self.chosenCategory {
-                case 0:
-                    let charactersResponse = try JSONDecoder().decode(self.categories.0, from: data)
-                    charactersResponse.results.forEach { item in
-                        self.objectsFromResponse.updateValue([item.gender, item.birth_year], forKey: item.name)
-                    }
-                    self.reloadTableView()
-                case 1:
-                    let charactersResponse = try JSONDecoder().decode(self.categories.1, from: data)
-                    charactersResponse.results.forEach { item in
-                        self.objectsFromResponse.updateValue([item.terrain, item.population], forKey: item.name)
-                    }
-                    self.reloadTableView()
-                case 2:
-                    let charactersResponse = try JSONDecoder().decode(self.categories.2, from: data)
-                    charactersResponse.results.forEach { item in
-                        self.objectsFromResponse.updateValue([item.model, item.crew], forKey: item.name)
-                    }
-                    self.reloadTableView()
-                case 3:
-                    let charactersResponse = try JSONDecoder().decode(self.categories.3, from: data)
-                    charactersResponse.results.forEach { item in
-                        self.objectsFromResponse.updateValue([item.model, item.crew], forKey: item.name)
-                    }
-                    self.reloadTableView()
-                case 4:
-                    let charactersResponse = try JSONDecoder().decode(self.categories.4, from: data)
-                    charactersResponse.results.forEach { item in
-                        self.objectsFromResponse.updateValue([item.director, item.release_date], forKey: item.title)
-                    }
-                    self.reloadTableView()
-                default:
-                    let charactersResponse = try JSONDecoder().decode(self.categories.0, from: data)
-                    charactersResponse.results.forEach { item in
-                        self.objectsFromResponse.updateValue([item.homeworld, item.birth_year], forKey: item.name)
-                    }
-                    self.reloadTableView()
-                }
-            } catch  {
-                print(error)
-            }
-        }.resume()
     }
     
     
@@ -154,33 +94,68 @@ final class ObjectsListViewController: UIViewController {
     }
     
     private func reloadTableView() {
-        self.sortedArray = self.objectsFromResponse.map({ $0.key }).sorted(by: <)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.tableView.reloadData()
+        sortedArray = objectsFromResponse.map({ $0.key }).sorted(by: <)
+        if sortedArray.count == 0 {
+            configureRefreshButton()
+        } else {
+            shouldHideActivityIndicator = true
         }
+        tableView.reloadData()
     }
     
     private func parseDataForChosenCategory() {
         if chosenCategory != 4 {
             for page in 1...3 {
-                parseCharacter(page, urlCategories[chosenCategory])
+                NetworkManager.shared.parseObject(chosenCategory, page, urlCategories[chosenCategory]) { result in
+                    self.objectsFromResponse.merge(result)  { (current, _) in current }
+                }
             }
         } else {
-            parseCharacter(1, urlCategories[chosenCategory])
+            NetworkManager.shared.parseObject(chosenCategory, 1, urlCategories[chosenCategory]) { result in
+                self.objectsFromResponse.merge(result)  { (current, _) in current }
+            }
         }
-        reloadTableView()
     }
     
     private func configureRefreshButton() {
+        shouldHideActivityIndicator = true
+        showActivityIndicator()
         let refreshBarButtonItem = UIBarButtonItem(title: "Refresh", style: .done, target: self, action: #selector(refreshButtonPressed))
         self.navigationItem.rightBarButtonItem  = refreshBarButtonItem
     }
     
+    private func showActivityIndicator() {
+        let activityIndicator = UIActivityIndicatorView()
+        activityIndicator.frame = CGRect(x: 0, y: 0, width: UIConstants.activityIndicatorSize, height: UIConstants.activityIndicatorSize)
+        activityIndicator.color = .white
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.style = .large
+        
+        view.addSubview(activityIndicator)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        activityIndicator.backgroundColor = UIColor.AppColors.textColor.withAlphaComponent(0.4)
+        activityIndicator.widthAnchor.constraint(equalToConstant: UIConstants.activityIndicatorSize).isActive = true
+        activityIndicator.heightAnchor.constraint(equalToConstant: UIConstants.activityIndicatorSize).isActive = true
+        activityIndicator.layer.cornerRadius = UIConstants.cornerRadius
+        activityIndicator.startAnimating()
+        if shouldHideActivityIndicator {
+            activityIndicator.stopAnimating()
+        }
+    }
+    
     @objc private func refreshButtonPressed() {
-        parseDataForChosenCategory()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            if self.sortedArray.count != 0 {
-                self.navigationItem.rightBarButtonItem = nil
+        shouldHideActivityIndicator = false
+        showActivityIndicator()
+        DispatchQueue.global().async {
+            self.parseDataForChosenCategory()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                self.shouldHideActivityIndicator = true
+                self.reloadTableView()
+                if self.sortedArray.count != 0 {
+                    self.navigationItem.rightBarButtonItem = nil
+                }
             }
         }
     }

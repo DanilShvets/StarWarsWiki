@@ -42,7 +42,6 @@ class CategoriesViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureCell()
-        animateCell()
     }
     
     required init?(coder: NSCoder) {
@@ -76,12 +75,4 @@ class CategoriesViewCell: UICollectionViewCell {
     func fillImageWith(imageName: String) {
         self.image.image = UIImage(named: imageName)
     }
-    
-    private func animateCell() {
-        image.alpha = 0
-        UIView.animate(withDuration: 0.5) {
-            self.image.alpha = 1
-        }
-    }
-    
 }
