@@ -48,6 +48,7 @@ final class ObjectsListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .gray
         view.backgroundColor = UIColor.AppColors.backgroundColor
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
     }
@@ -82,7 +83,10 @@ final class ObjectsListViewController: UIViewController {
         tableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         tableView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        if view.safeAreaInsets.bottom != 0 {
+            tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.padding, right: 0)
+        }
     }
     
     private func presentChosenCategoryView(_ objectName: String) {

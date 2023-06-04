@@ -8,7 +8,7 @@
 import UIKit
 import Kingfisher
 
-final class ObjectPageViewController: UIViewController {
+final class ObjectPageViewController: UIViewController, UIPopoverPresentationControllerDelegate {
     
     private struct UIConstants {
         static let padding: CGFloat = 10
@@ -20,12 +20,21 @@ final class ObjectPageViewController: UIViewController {
         static let headersLabelHeight: CGFloat = 30
         static let textFontSize: CGFloat = 20
         static let textLabelHeight: CGFloat = 60
+        static let buttonSize: CGFloat = 35
     }
+    
+    private lazy var infoButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.addTarget(self, action: #selector(infoButtonPressed), for: .touchUpInside)
+        return button
+    }()
     
     private lazy var image: UIImageView = {
         let image = UIImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
         image.contentMode = .scaleAspectFit
+        image.isUserInteractionEnabled = true
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(imageTapped)))
         return image
     }()
     
@@ -80,9 +89,12 @@ final class ObjectPageViewController: UIViewController {
         return label
     }()
     
+    private let largeConfig = UIImage.SymbolConfiguration(pointSize: UIConstants.buttonSize, weight: .bold, scale: .large)
     private let imagesURLs = ImagesURLs()
     private var urlDict: [[String: String]] = [[:]]
     private let headers = [["Gender", "Birth year"], ["Terrain", "Population"] , ["Model", "Crew"], ["Model", "Crew"], ["Director", "Release date"]]
+    private var statusBarHeight: CGFloat = 0.0
+    private var navigationBarHeight: CGFloat = 0.0
     
     var objectName = ""
     var objectData = [String]()
@@ -97,6 +109,9 @@ final class ObjectPageViewController: UIViewController {
         
         urlDict = [imagesURLs.charactersImages, imagesURLs.planetsImages, imagesURLs.shipsImages, imagesURLs.vehiclesImages, imagesURLs.filmsImages]
         
+        if !UserDefaults.standard.bool(forKey: "isInfoShown") {
+            configureInfoButton()
+        }
         configureImageView()
         configureImage(objectName, chosenCategory)
         configureNameLabel()
@@ -109,8 +124,27 @@ final class ObjectPageViewController: UIViewController {
         }
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        statusBarHeight = view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0.0
+        navigationBarHeight = self.navigationController?.navigationBar.frame.height ?? 0.0
+    }
+    
     
     // MARK: - Конфигурация UI
+    
+    private func configureInfoButton() {
+        view.addSubview(infoButton)
+        infoButton.translatesAutoresizingMaskIntoConstraints = false
+        infoButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -UIConstants.padding).isActive = true
+        infoButton.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -2*UIConstants.padding).isActive = true
+        infoButton.widthAnchor.constraint(equalToConstant: UIConstants.buttonSize).isActive = true
+        infoButton.heightAnchor.constraint(equalToConstant: UIConstants.buttonSize).isActive = true
+        let infoButtonImage = UIImage(systemName: "info.circle", withConfiguration: largeConfig)
+        infoButton.setImage(infoButtonImage, for: .normal)
+        infoButton.tintColor = .systemGray
+        infoButton.imageView?.contentMode = .scaleAspectFill
+    }
     
     private func configureImageView() {
         view.addSubview(image)
@@ -127,8 +161,8 @@ final class ObjectPageViewController: UIViewController {
         name.translatesAutoresizingMaskIntoConstraints = false
         name.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         name.topAnchor.constraint(equalTo: image.bottomAnchor, constant: UIConstants.padding).isActive = true
-        name.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 10.0).isActive = true
-        name.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -10.0).isActive = true
+        name.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: UIConstants.padding).isActive = true
+        name.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -UIConstants.padding).isActive = true
         name.text = objectName
     }
     
@@ -137,8 +171,8 @@ final class ObjectPageViewController: UIViewController {
             view.addSubview(object)
             object.translatesAutoresizingMaskIntoConstraints = false
             object.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-            object.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 10.0).isActive = true
-            object.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -10.0).isActive = true
+            object.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: UIConstants.padding).isActive = true
+            object.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -UIConstants.padding).isActive = true
             object.text = headers[chosenCategory][object.tag]
         }
         
@@ -146,8 +180,8 @@ final class ObjectPageViewController: UIViewController {
             view.addSubview(object)
             object.translatesAutoresizingMaskIntoConstraints = false
             object.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-            object.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 10.0).isActive = true
-            object.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -10.0).isActive = true
+            object.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: UIConstants.padding).isActive = true
+            object.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -UIConstants.padding).isActive = true
             object.text = objectData[object.tag]
         }
         
@@ -191,5 +225,44 @@ final class ObjectPageViewController: UIViewController {
         image.kf.setImage(with: URL(string: urlDict[chosenCategory][objectName] ?? ""))
     }
     
+    private func presentImageViewController() {
+        let imageViewController = ImageViewController(topAreaHeight: statusBarHeight + navigationBarHeight, navigationBarHeight: navigationBarHeight, image: image.image ?? UIImage())
+        present(imageViewController, animated: true, completion: nil)
+    }
+    
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        .none
+    }
+    
+    func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
+        false
+    }
+    
+    @objc func imageTapped(gesture: UIGestureRecognizer) {
+        print("Image tapped")
+        presentImageViewController()
+    }
+    
+    @objc private func infoButtonPressed() {
+        let infoViewController = InfoViewController()
+        infoViewController.modalPresentationStyle = .popover
+        infoViewController.preferredContentSize = CGSize(width: 200, height: 110)
+        guard let presentationVC = infoViewController.popoverPresentationController else {return}
+        presentationVC.delegate = self
+        presentationVC.sourceView = infoButton
+        presentationVC.permittedArrowDirections = .down
+        presentationVC.sourceRect = CGRect(x: infoButton.bounds.midX, y: infoButton.bounds.minY, width: 0, height: 0)
+        present(infoViewController, animated: true)
+        presentationVC.passthroughViews = [infoButton]
+        
+        if infoButton.imageView?.image == UIImage(systemName: "info.circle", withConfiguration: largeConfig) {
+            let infoButtonImage = UIImage(systemName: "xmark.circle", withConfiguration: largeConfig)
+            infoButton.setImage(infoButtonImage, for: .normal)
+        } else {
+            UserDefaults.standard.set(true, forKey: "isInfoShown")
+            presentedViewController?.dismiss(animated: true)
+            infoButton.isHidden = true
+        }
+    }
     
 }

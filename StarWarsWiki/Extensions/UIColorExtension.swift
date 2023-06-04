@@ -16,5 +16,6 @@ extension UIColor {
         static let signUpColor = UIColor(red: 0.22, green: 0.06, blue: 0.06, alpha: 1.00)
         static let grayColor = UIColor(red: 0.85, green: 0.85, blue: 0.85, alpha: 1.00)
         static let vaderColor = UIColor(red: 0.82, green: 0.07, blue: 0.07, alpha: 1.00)
+        static let darkGray = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1.00)
     }
 }

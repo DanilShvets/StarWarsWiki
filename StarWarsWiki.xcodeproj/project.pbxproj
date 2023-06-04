@@ -32,6 +32,9 @@
 		E05A6DE229EB37E5009B385B /* FilmsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E05A6DE129EB37E5009B385B /* FilmsResponse.swift */; };
 		E06A9A2629E5D0D700BD4945 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = E06A9A2529E5D0D700BD4945 /* Kingfisher */; };
 		E06A9A2829E5D10E00BD4945 /* ObjectPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E06A9A2729E5D10E00BD4945 /* ObjectPageViewController.swift */; };
+		E0C33ACB2A2CB884007B5F39 /* ImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C33ACA2A2CB884007B5F39 /* ImageViewController.swift */; };
+		E0C33ACD2A2CBEB1007B5F39 /* ImageWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C33ACC2A2CBEB1007B5F39 /* ImageWindowView.swift */; };
+		E0C33ACF2A2CE927007B5F39 /* InfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C33ACE2A2CE927007B5F39 /* InfoViewController.swift */; };
 		E0CA7A2029E5C62D00A287ED /* PlanetsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CA7A1F29E5C62D00A287ED /* PlanetsResponse.swift */; };
 		E0CF757429E2E2D80090F5D3 /* ObjectsListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CF757329E2E2D80090F5D3 /* ObjectsListViewCell.swift */; };
 		E0D5A7A729E2FB8D006E08EE /* CharactersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0D5A7A629E2FB8D006E08EE /* CharactersResponse.swift */; };
@@ -72,6 +75,9 @@
 		E05A6DDF29EB37D3009B385B /* FilmModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilmModel.swift; sourceTree = "<group>"; };
 		E05A6DE129EB37E5009B385B /* FilmsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilmsResponse.swift; sourceTree = "<group>"; };
 		E06A9A2729E5D10E00BD4945 /* ObjectPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectPageViewController.swift; sourceTree = "<group>"; };
+		E0C33ACA2A2CB884007B5F39 /* ImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewController.swift; sourceTree = "<group>"; };
+		E0C33ACC2A2CBEB1007B5F39 /* ImageWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageWindowView.swift; sourceTree = "<group>"; };
+		E0C33ACE2A2CE927007B5F39 /* InfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoViewController.swift; sourceTree = "<group>"; };
 		E0CA7A1F29E5C62D00A287ED /* PlanetsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetsResponse.swift; sourceTree = "<group>"; };
 		E0CF757329E2E2D80090F5D3 /* ObjectsListViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectsListViewCell.swift; sourceTree = "<group>"; };
 		E0D5A7A629E2FB8D006E08EE /* CharactersResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharactersResponse.swift; sourceTree = "<group>"; };
@@ -205,6 +211,8 @@
 			children = (
 				E058FBA629E2AAE900BF957F /* ObjectsList */,
 				E058FBA729E2AAFB00BF957F /* ObjectPage */,
+				E0C33AC92A2CB863007B5F39 /* ImageScreen */,
+				E0C33ACE2A2CE927007B5F39 /* InfoViewController.swift */,
 			);
 			path = ObjectsScreens;
 			sourceTree = "<group>";
@@ -269,6 +277,15 @@
 				E05A6DE129EB37E5009B385B /* FilmsResponse.swift */,
 			);
 			path = FilmResponse;
+			sourceTree = "<group>";
+		};
+		E0C33AC92A2CB863007B5F39 /* ImageScreen */ = {
+			isa = PBXGroup;
+			children = (
+				E0C33ACA2A2CB884007B5F39 /* ImageViewController.swift */,
+				E0C33ACC2A2CBEB1007B5F39 /* ImageWindowView.swift */,
+			);
+			path = ImageScreen;
 			sourceTree = "<group>";
 		};
 		E0E2A46E29E839DF00341CE9 /* SignUp */ = {
@@ -373,6 +390,7 @@
 				E03E277929E08AEC002F299A /* UIColorExtension.swift in Sources */,
 				E0E2A47029E839FC00341CE9 /* SignUpViewController.swift in Sources */,
 				E03E276F29E0876C002F299A /* LoginModel.swift in Sources */,
+				E0C33ACB2A2CB884007B5F39 /* ImageViewController.swift in Sources */,
 				E0CF757429E2E2D80090F5D3 /* ObjectsListViewCell.swift in Sources */,
 				E05A6DD829EB3582009B385B /* ShipsResponse.swift in Sources */,
 				E0CA7A2029E5C62D00A287ED /* PlanetsResponse.swift in Sources */,
@@ -384,11 +402,13 @@
 				E03E275829E08408002F299A /* AppDelegate.swift in Sources */,
 				E05A6DD629EB3565009B385B /* ShipModel.swift in Sources */,
 				E03E275A29E08408002F299A /* SceneDelegate.swift in Sources */,
+				E0C33ACD2A2CBEB1007B5F39 /* ImageWindowView.swift in Sources */,
 				E0D5A7A729E2FB8D006E08EE /* CharactersResponse.swift in Sources */,
 				E05A6DDB29EB3683009B385B /* VehicleModel.swift in Sources */,
 				E03E278129E09702002F299A /* CategoriesViewCell.swift in Sources */,
 				E06A9A2829E5D10E00BD4945 /* ObjectPageViewController.swift in Sources */,
 				E001E46D29E343D2001D3DAF /* ImagesURLs.swift in Sources */,
+				E0C33ACF2A2CE927007B5F39 /* InfoViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
