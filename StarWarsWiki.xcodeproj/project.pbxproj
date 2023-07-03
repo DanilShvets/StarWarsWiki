@@ -87,6 +87,7 @@
 		E066932E2A51C899000D8646 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		E06693312A51C96C000D8646 /* ProfilePhotosCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePhotosCell.swift; sourceTree = "<group>"; };
 		E06A9A2729E5D10E00BD4945 /* ObjectPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectPageViewController.swift; sourceTree = "<group>"; };
+		E0B73C262A52B43D0028241E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E0C33ACA2A2CB884007B5F39 /* ImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewController.swift; sourceTree = "<group>"; };
 		E0C33ACC2A2CBEB1007B5F39 /* ImageWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageWindowView.swift; sourceTree = "<group>"; };
 		E0C33ACE2A2CE927007B5F39 /* InfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoViewController.swift; sourceTree = "<group>"; };
@@ -118,6 +119,7 @@
 		E03E274B29E08408002F299A = {
 			isa = PBXGroup;
 			children = (
+				E0B73C262A52B43D0028241E /* README.md */,
 				E03E275629E08408002F299A /* StarWarsWiki */,
 				E03E275529E08408002F299A /* Products */,
 			);
