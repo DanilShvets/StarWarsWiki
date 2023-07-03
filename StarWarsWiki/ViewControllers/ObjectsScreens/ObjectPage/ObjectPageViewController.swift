@@ -238,8 +238,10 @@ final class ObjectPageViewController: UIViewController, UIPopoverPresentationCon
         false
     }
     
+    
+    // MARK: - @objc методы
+    
     @objc func imageTapped(gesture: UIGestureRecognizer) {
-        print("Image tapped")
         presentImageViewController()
     }
     

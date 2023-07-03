@@ -18,6 +18,7 @@ final class SignUpViewController: UIViewController, UITextFieldDelegate {
     }
     
     private let logInModel = LogInModel()
+    private let uploadUserDataModel = UploadUserDataModel()
     private let alert = UIAlertController(title: "Alert", message: "", preferredStyle: .alert)
     private let emailIcon: UIImageView = UIImageView(image: UIImage(systemName: "mail")!)
     private let userIcon: UIImageView = UIImageView(image: UIImage(systemName: "person")!)
@@ -32,10 +33,12 @@ final class SignUpViewController: UIViewController, UITextFieldDelegate {
         return button
     }()
     
+    
     // MARK: - override метод
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         hideKeyboard()
         configureView()
     }
@@ -51,7 +54,6 @@ final class SignUpViewController: UIViewController, UITextFieldDelegate {
         self.emailInputView.delegate = self
         self.usernameInputView.delegate = self
         self.passwordInputView.delegate = self
-        alert.addAction(UIAlertAction(title: "ОК", style: .default, handler: nil))
         configureUIView()
     }
     
@@ -69,15 +71,16 @@ final class SignUpViewController: UIViewController, UITextFieldDelegate {
         signUpLabel.widthAnchor.constraint(equalToConstant: view.bounds.width/1.2).isActive = true
         signUpLabel.heightAnchor.constraint(equalToConstant: view.frame.size.width/10).isActive = true
         
-        let emailStack = UIStackView(arrangedSubviews: [emailIcon, emailInputView])
-        emailInputView.textColor = UIColor.AppColors.textColor
-        emailInputView.attributedPlaceholder = NSAttributedString(string: "E-mail",
-                                                                 attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
-        
         let userStack = UIStackView(arrangedSubviews: [userIcon, usernameInputView])
         usernameInputView.textColor = UIColor.AppColors.textColor
         usernameInputView.attributedPlaceholder = NSAttributedString(string: "Username",
                                                                      attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
+        
+        
+        let emailStack = UIStackView(arrangedSubviews: [emailIcon, emailInputView])
+        emailInputView.textColor = UIColor.AppColors.textColor
+        emailInputView.attributedPlaceholder = NSAttributedString(string: "E-mail",
+                                                                 attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
         
         let passwordStack = UIStackView(arrangedSubviews: [passwordIcon, passwordInputView])
         passwordInputView.textColor = UIColor.AppColors.textColor
@@ -86,7 +89,7 @@ final class SignUpViewController: UIViewController, UITextFieldDelegate {
         passwordInputView.attributedPlaceholder = NSAttributedString(string: "Password",
                                                                      attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
         
-        [emailStack, userStack, passwordStack].forEach {stack in
+        [userStack, emailStack, passwordStack].forEach {stack in
             stack.axis = .horizontal
             stack.spacing = UIConstants.spacing
             stack.alignment = .center
@@ -98,13 +101,13 @@ final class SignUpViewController: UIViewController, UITextFieldDelegate {
             stack.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10)
         }
         
-        [emailIcon, userIcon, passwordIcon].forEach {icon in
+        [userIcon, emailIcon, passwordIcon].forEach {icon in
             icon.tintColor = .gray
             icon.heightAnchor.constraint(equalTo: emailStack.heightAnchor, constant: UIConstants.iconPadding).isActive = true
             icon.widthAnchor.constraint(equalTo: icon.heightAnchor).isActive = true
         }
         
-        let stack = UIStackView(arrangedSubviews: [emailStack, userStack, passwordStack])
+        let stack = UIStackView(arrangedSubviews: [userStack, emailStack, passwordStack])
         stack.axis = .vertical
         stack.distribution = .fillEqually
         stack.spacing = UIConstants.spacing
@@ -128,6 +131,40 @@ final class SignUpViewController: UIViewController, UITextFieldDelegate {
         signUpButton.layer.cornerRadius = view.bounds.width/20
     }
     
+    private func presentCategories(withUserID userID: String) {
+        let username = self.usernameInputView.text!
+        DispatchQueue.global(qos: .background).async {
+            self.uploadUserDataModel.sendProfileDataToFirebase(uid: userID, username: username)
+            self.uploadUserDataModel.sendProfileImageToFirebase(uid: userID, photo: (UIImage(named: "captainRex")?.jpegData(compressionQuality: 1.0))!) { error in
+                
+            }
+        }
+        saveImage(image: UIImage(named: "captainRex")!)
+        let categoriesViewController = CategoriesViewController()
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        navigationController?.navigationItem.hidesBackButton = true
+        self.navigationController?.pushViewController(categoriesViewController, animated: true)
+    }
+    
+    
+    // MARK: - Сохранение фото профиля
+    
+    private func saveImage(image: UIImage) {
+        guard let data = image.jpegData(compressionQuality: 1.0) ?? image.pngData() else {
+            return
+        }
+        guard let directory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) as NSURL else {
+            return
+        }
+        do {
+            try data.write(to: directory.appendingPathComponent("profileImage.png")!)
+            return
+        } catch {
+            print(error.localizedDescription)
+            return
+        }
+    }
+    
     
     // MARK: - UITextFields и клавиатура
     
@@ -145,14 +182,21 @@ final class SignUpViewController: UIViewController, UITextFieldDelegate {
     // MARK: - @objc методы
     
     @objc private func signUpButtonPressed() {
-        self.logInModel.signUp(email: emailInputView.text, username: usernameInputView.text, password: passwordInputView.text) { error in
-            self.alert.message = error
-            self.present(self.alert, animated: true, completion: nil)
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            if self.userSignedUp() {
-                self.navigationController?.popViewController(animated: true)
+        signUpButton.loadingIndicator(show: true)
+        signUpButton.setTitle("", for: .normal)
+        self.logInModel.createNewUser(username: self.usernameInputView.text, email: self.emailInputView.text, password: self.passwordInputView.text) { result, error in
+            if error == "" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self.signUpButton.loadingIndicator(show: false)
+                    self.signUpButton.setTitle("Sign Up", for: .normal)
+                    self.presentCategories(withUserID: result)
+                }
+            } else {
+                self.signUpButton.loadingIndicator(show: false)
+                self.signUpButton.setTitle("Sign Up", for: .normal)
+                let alert = UIAlertController(title: "Alert", message: error, preferredStyle: UIAlertController.Style.alert)
+                alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
             }
         }
     }

@@ -13,6 +13,7 @@ final class CategoriesViewController: UIViewController {
         static let padding: CGFloat = 10
         static let cellPadding: CGFloat = 40
         static let cellHieght: CGFloat = 160
+        static let barButtonSize: CGFloat = 42
     }
     
     private lazy var collectionView: UICollectionView = {
@@ -29,15 +30,21 @@ final class CategoriesViewController: UIViewController {
         return collection
     }()
     
-    private lazy var logOutButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.addTarget(self, action: #selector(logOutButtonPressed), for: .touchUpInside)
-        button.titleLabel?.textColor = UIColor.AppColors.signUpColor
+    private lazy var profileButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.addTarget(self, action: #selector(profileButtonPressed), for: .touchUpInside)
+        button.setImage(UIImage(systemName: "person.circle"), for: .normal)
         return button
     }()
     
     private let labelTexts = ["CHARACTERS", "PLANETS", "SHIPS", "VEHICLES", "FILMS"]
     private let categoryModel = [CharacterModel.self, PlanetModel.self] as [Any]
+    private let logInModel = LogInModel()
+    private let uploadUserDataModel = UploadUserDataModel()
+    private let downloadImagesModel = DownloadImagesModel()
+    private let getUserDataModel = GetUserDataModel()
+    private lazy var profileBarButtonItem = UIBarButtonItem()
+    private lazy var userID = ""
     
     
     // MARK: - override метод
@@ -46,14 +53,23 @@ final class CategoriesViewController: UIViewController {
         super.viewDidLoad()
         self.title = "CATEGORIES"
         
+        getUserDataModel.getUserID { uid in
+            self.userID = uid
+        }
+        
         view.backgroundColor = UIColor.AppColors.backgroundColor
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         self.navigationItem.setHidesBackButton(true, animated: true)
         
-        let logoutBarButtonItem = UIBarButtonItem(title: "Log Out", style: .done, target: self, action: #selector(logOutButtonPressed))
-        self.navigationItem.rightBarButtonItem  = logoutBarButtonItem
-        
         configureCollectionView()
+    }
+    
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        DispatchQueue.main.asyncAfter(deadline: .now()) {
+            self.configureProfileButton()
+        }
     }
     
     
@@ -69,6 +85,31 @@ final class CategoriesViewController: UIViewController {
         collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
     }
     
+    private func configureProfileButton() {
+        profileButton.translatesAutoresizingMaskIntoConstraints = false
+        profileButton.widthAnchor.constraint(equalToConstant: UIConstants.barButtonSize).isActive = true
+        profileButton.heightAnchor.constraint(equalTo: profileButton.widthAnchor).isActive = true
+        profileButton.layer.cornerRadius = UIConstants.barButtonSize / 2
+        profileButton.layer.masksToBounds = true
+        profileBarButtonItem = UIBarButtonItem(customView: self.profileButton)
+        self.navigationItem.rightBarButtonItem  = profileBarButtonItem
+        self.navigationItem.rightBarButtonItem?.tintColor = .clear
+        
+        if let image = getSavedImage(named: "profileImage.png") {
+            self.profileButton.setImage(image, for: .normal)
+            self.profileBarButtonItem = UIBarButtonItem(customView: self.profileButton)
+        } else {
+            downloadImagesModel.downloadBarImage(userID: userID) { image in
+                let buttonImage = image
+                DispatchQueue.main.async {
+                    self.profileButton.setImage(buttonImage, for: .normal)
+                    self.profileBarButtonItem = UIBarButtonItem(customView: self.profileButton)
+                    self.saveImage(image: buttonImage!)
+                }
+            }
+        }
+    }
+    
     private func presentChosenCategoryView(_ modelIndex: Int) {
         let nextViewController = ObjectsListViewController()
         nextViewController.chosenCategory = modelIndex
@@ -76,19 +117,39 @@ final class CategoriesViewController: UIViewController {
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
-    private func presentLogInController() {
-        UserDefaults.standard.set(false, forKey: "userLoggedIn")
-        let logInViewController = LogInViewController()
-        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
-        navigationController?.navigationItem.hidesBackButton = true
-        self.navigationController?.pushViewController(logInViewController, animated: true)
+    
+    // MARK: - Работа с фото профиля
+    
+    private func saveImage(image: UIImage) {
+        guard let data = image.jpegData(compressionQuality: 1.0) ?? image.pngData() else {
+            return
+        }
+        guard let directory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) as NSURL else {
+            return
+        }
+        do {
+            try data.write(to: directory.appendingPathComponent("profileImage.png")!)
+            return
+        } catch {
+            print(error.localizedDescription)
+            return
+        }
+    }
+    
+    private func getSavedImage(named: String) -> UIImage? {
+        if let dir = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) {
+            return UIImage(contentsOfFile: URL(fileURLWithPath: dir.absoluteString).appendingPathComponent(named).path)
+        }
+        return nil
     }
     
     
     // MARK: - @objc метод
     
-    @objc private func logOutButtonPressed() {
-        presentLogInController()
+    @objc private func profileButtonPressed() {
+        let profileViewController = ProfileViewController()
+        profileViewController.userID = userID
+        self.navigationController?.pushViewController(profileViewController, animated: true)
     }
     
 }

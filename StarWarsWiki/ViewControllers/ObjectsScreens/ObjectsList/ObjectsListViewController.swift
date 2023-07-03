@@ -64,7 +64,7 @@ final class ObjectsListViewController: UIViewController {
         super.viewDidAppear(true)
         DispatchQueue.global().async {
             self.parseDataForChosenCategory()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
                 self.reloadTableView()
             }
         }
@@ -149,12 +149,14 @@ final class ObjectsListViewController: UIViewController {
         }
     }
     
+    // MARK: - @objc методы
+    
     @objc private func refreshButtonPressed() {
         shouldHideActivityIndicator = false
         showActivityIndicator()
         DispatchQueue.global().async {
             self.parseDataForChosenCategory()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
                 self.shouldHideActivityIndicator = true
                 self.reloadTableView()
                 if self.sortedArray.count != 0 {
@@ -165,6 +167,9 @@ final class ObjectsListViewController: UIViewController {
     }
     
 }
+
+
+// MARK: - Работа с таблицей
 
 extension ObjectsListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

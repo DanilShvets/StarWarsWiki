@@ -7,76 +7,78 @@
 
 import Foundation
 import Firebase
+import FirebaseAuth
 
 final class LogInModel {
     
-    func logIn(email: String?, password: String?, complitionError: @escaping (String) -> ()) {
-        guard let email = email, !email.isEmpty, isValidEmail(email: email) else {
-            complitionError("Incorrect email")
+    private var ref: DatabaseReference!
+    
+    func logIn(email: String?, password: String?, complitionError: @escaping (String, String) -> ()) {
+        guard let email = email, isValidEmail(email: email) else {
+            complitionError("", "Incorrect email format")
             return
         }
-        guard let password = password,  password.count >= 6 else {
-            complitionError("Incorrect password")
+        guard let password = password, isValidPassword(password: password) else {
+            complitionError("", "The password must be at least 6 characters long and contain only letters, numbers, and signs. or _")
             return
         }
-        Auth.auth().signIn(withEmail: email, password: password) { (result, error) in
-            if error == nil {
-                complitionError("Logging in")
+        
+        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+            if ((authResult?.user) != nil && authResult!.user.uid != "") {
                 UserDefaults.standard.set(true, forKey: "userLoggedIn")
-                UserDefaults.standard.synchronize()
+                UserDefaults.standard.set(authResult!.user.uid, forKey: "userID")
+                complitionError(String(authResult!.user.uid), "")
             } else {
-                complitionError(error!.localizedDescription)
+                if error != nil {
+                    complitionError("", error!.localizedDescription)
+                }
             }
         }
     }
     
-    func signUp(email: String?, username: String?, password: String?, complitionError: @escaping (String) -> ()) {
-        guard let email = email, isValidEmail(email: email) else {
-            complitionError("Incorrect email format")
+    func createNewUser(username: String?, email: String?, password: String?, complitionError: @escaping (String, String) -> ()) {
+        ref = Database.database(url: "https://usersdatabaseforapp-default-rtdb.firebaseio.com/").reference()
+        
+        guard let username = username, isValidUsername(username: username) else {
+            complitionError("", "The username must contain at least 3 characters and contain only latin letters and numbers")
             return
         }
-        guard let username = username, isValidUsername(username: username) else {
-//            complitionError("Имя пользователя должно быть не менее 3 символов и содержать только латинские буквы и цифры")
-            complitionError("The username must contain at least 3 characters and contain only latin letters and numbers")
+        guard let email = email, isValidEmail(email: email) else {
+            complitionError("", "Incorrect email format")
             return
         }
         guard let password = password, isValidPassword(password: password) else {
-//            complitionError("Пароль должен быть не менее 6 символов и содержать только буквы, цифры и знаки . или _")
-            complitionError("The password must be at least 6 characters long and contain only letters, numbers, and signs. or _")
+            complitionError("", "The password must be at least 6 characters long and contain only letters, numbers, and signs. or _")
             return
         }
         
-        Auth.auth().fetchSignInMethods(forEmail: email, completion: { (signInMethods, error) in
-            guard let signInMethods = signInMethods else {
-                return
-            }
-            print("signInMethods:\(signInMethods).")
-            
-            if signInMethods[0] == "password" {
-                complitionError("The email is already used")
+        ref.child("usernames/\(username)").getData(completion:  { error, snapshot in
+            guard let snapshot = snapshot else {return}
+            if !snapshot.exists() {
+                Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+                    if ((authResult?.user) != nil) {
+                        UserDefaults.standard.set(true, forKey: "userLoggedIn")
+                        UserDefaults.standard.set(authResult!.user.uid, forKey: "userID")
+                        complitionError(String(authResult!.user.uid), "")
+                    } else {
+                        if error != nil {
+                            complitionError("", error!.localizedDescription)
+                        }
+                    }
+                }
+            } else {
+                complitionError("", "Username is taken")
             }
         })
-        
-        Auth.auth().createUser(withEmail: email, password: password) { (result, error) in
-            guard let result = result else {
-                return
-            }
-            
-            let uid = result.user.uid
-            UserDefaults.standard.set(uid, forKey: "current_user")
-            
-            let values = ["email": email, "password": password]
-            
-            let usersReferense = Database.database().reference().child("users")
-            usersReferense.child(uid).updateChildValues(values)
-            
-            if error == nil {
-                UserDefaults.standard.set(true, forKey: "userSignedUp")
-                UserDefaults.standard.synchronize()
-            } else {
-                print("error: \(String(describing: error)).")
-                complitionError(error!.localizedDescription)
-            }
+    }
+    
+    func signOut(completion: @escaping (Bool) -> ()) {
+        let firebaseAuth = Auth.auth()
+        do {
+            try firebaseAuth.signOut()
+            completion(true)
+        } catch let signOutError as NSError {
+            print("Error signing out: %@", signOutError)
         }
     }
     
@@ -97,21 +99,4 @@ final class LogInModel {
         let passPred = NSPredicate(format:"SELF MATCHES %@", pass)
         return passPred.evaluate(with: password)
     }
-    
-    func wrongUser(wrongUser: Bool, complitionError: (String) -> ()) {
-        if wrongUser == true {
-            complitionError("Incorrect email or password")
-        }
-        return
-    }
-    
-//    func isUser(exist: Bool, complitionError: (String) -> ()) {
-//        if exist == true {
-//            complitionError("Такой пользователь существует")
-//        } else {
-//            complitionError("Вы успешно зарегистрированы!")
-//        }
-//        return
-//    }
-    
 }

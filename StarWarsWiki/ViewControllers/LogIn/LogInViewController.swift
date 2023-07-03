@@ -60,10 +60,6 @@ final class LogInViewController: UIViewController, UITextFieldDelegate {
         reloadView()
     }
     
-    private func userSignedUp() -> Bool {
-        return UserDefaults.standard.bool(forKey: "userSignedUp")
-    }
-    
     
     // MARK: - Конфигурация UI
     
@@ -78,18 +74,11 @@ final class LogInViewController: UIViewController, UITextFieldDelegate {
     private func presentLogIn() {
         UserDefaults.standard.set(false, forKey: "userLoggedIn")
         UserDefaults.standard.synchronize()
-        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         self.navigationItem.setHidesBackButton(true, animated: true)
     }
     
     private func reloadView() {
         presentLogIn()
-        if userSignedUp() {
-            alert.message = "You are successfully registered"
-            self.present(alert, animated: true, completion: nil)
-            UserDefaults.standard.set(false, forKey: "userSignedUp")
-            UserDefaults.standard.synchronize()
-        }
     }
     
     private func configureUserStack() -> UIStackView {
@@ -194,33 +183,6 @@ final class LogInViewController: UIViewController, UITextFieldDelegate {
         textImage.image = UIImage(named: "star-wars-logo-black")
     }
     
-    private func showActivityIndicatory() {
-        [logInButton, signUpButton, emailInputView, passwordInputView].forEach {object in
-            object.isEnabled = false
-        }
-        let activityIndicator = UIActivityIndicatorView()
-        activityIndicator.frame = CGRect(x: 0, y: 0, width: UIConstants.activityIndicatorSize, height: UIConstants.activityIndicatorSize)
-        activityIndicator.color = .white
-        activityIndicator.hidesWhenStopped = true
-        activityIndicator.style = .large
-        
-        view.addSubview(activityIndicator)
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        activityIndicator.backgroundColor = UIColor.AppColors.textColor.withAlphaComponent(0.4)
-        activityIndicator.widthAnchor.constraint(equalToConstant: UIConstants.activityIndicatorSize).isActive = true
-        activityIndicator.heightAnchor.constraint(equalToConstant: UIConstants.activityIndicatorSize).isActive = true
-        activityIndicator.layer.cornerRadius = UIConstants.cornerRadius
-        activityIndicator.startAnimating()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            activityIndicator.stopAnimating()
-            [self.logInButton, self.signUpButton, self.emailInputView, self.passwordInputView].forEach {object in
-                object.isEnabled = true
-            }
-        }
-    }
-    
     private func presentSignUp() {
         let signUpController = SignUpViewController()
         let backItem = UIBarButtonItem()
@@ -261,18 +223,23 @@ final class LogInViewController: UIViewController, UITextFieldDelegate {
     // MARK: - @objc методы
         
     @objc private func logInButtonPressed() {
-        self.logInModel.logIn(email: emailInputView.text, password: passwordInputView.text) { error in
-            if error != "Logging in" {
-                self.alert.message = error
-                self.present(self.alert, animated: true, completion: nil)
+        logInButton.loadingIndicator(show: true)
+        logInButton.setTitle("", for: .normal)
+        self.logInModel.logIn(email: self.emailInputView.text, password: self.passwordInputView.text) { result, error  in
+            if error == "" {
+                if result != "" {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        self.logInButton.loadingIndicator(show: false)
+                        self.logInButton.setTitle("Log In", for: .normal)
+                        self.presentCategories()
+                    }
+                }
             } else {
-                self.showActivityIndicatory()
-            }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            if UserDefaults.standard.bool(forKey: "userLoggedIn") {
-                self.presentCategories()
+                self.logInButton.loadingIndicator(show: false)
+                self.logInButton.setTitle("Log In", for: .normal)
+                let alert = UIAlertController(title: "Alert", message: error, preferredStyle: UIAlertController.Style.alert)
+                alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
             }
         }
     }
